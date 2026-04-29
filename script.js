@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }, { duration: 500, fill: "forwards" });
         });
 
-        const iteractables = document.querySelectorAll('a, .bento-item, .social-btn');
+        const iteractables = document.querySelectorAll('a, .bento-item, .social-btn, .pill');
         iteractables.forEach(link => {
             link.addEventListener('mouseenter', () => cursorOutline.classList.add('hover'));
             link.addEventListener('mouseleave', () => cursorOutline.classList.remove('hover'));
@@ -122,10 +122,10 @@ document.addEventListener('DOMContentLoaded', () => {
         new Chart(ctx, {
             type: 'radar',
             data: {
-                labels: ['Machine Learning', 'Data Analysis', 'Python', 'Mathematics', 'Algorithms', 'Databases'],
+                labels: ['Machine Learning', 'Data Analysis', 'Python', 'SQL & Databases', 'MLOps / Docker', 'Frontend Dev'],
                 datasets: [{
                     label: 'Skill Level',
-                    data: [85, 90, 95, 80, 75, 85],
+                    data: [88, 90, 95, 85, 80, 75],
                     backgroundColor: 'rgba(0, 240, 255, 0.2)',
                     borderColor: 'rgba(0, 240, 255, 1)',
                     pointBackgroundColor: 'rgba(139, 92, 246, 1)',

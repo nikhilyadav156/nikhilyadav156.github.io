@@ -1,130 +1,130 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    /* === PARTICLES.JS — LIGHT THEME === */
-    if(window.particlesJS) {
-        particlesJS("particles-js", {
-            "particles": {
-                "number": { "value": 50, "density": { "enable": true, "value_area": 900 } },
-                "color": { "value": "#c7d2fe" },
-                "shape": { "type": "circle" },
-                "opacity": { "value": 0.4, "random": true },
-                "size": { "value": 3, "random": true },
-                "line_linked": {
-                    "enable": true, "distance": 150,
-                    "color": "#a5b4fc", "opacity": 0.2, "width": 1
-                },
-                "move": {
-                    "enable": true, "speed": 1.5, "direction": "none",
-                    "random": false, "straight": false, "out_mode": "out", "bounce": false
-                }
-            },
-            "interactivity": {
-                "detect_on": "canvas",
-                "events": {
-                    "onhover": { "enable": true, "mode": "grab" },
-                    "onclick": { "enable": true, "mode": "push" },
-                    "resize": true
-                },
-                "modes": {
-                    "grab": { "distance": 140, "line_linked": { "opacity": 0.5 } },
-                    "push": { "particles_nb": 3 }
-                }
-            },
-            "retina_detect": true
+    /* ===========================
+       SOUND SYSTEM
+    =========================== */
+    let soundEnabled = false;
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function initAudio() {
+        if (!audioCtx) audioCtx = new AudioCtx();
+    }
+
+    function playClick() {
+        if (!soundEnabled || !audioCtx) return;
+        try {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.08);
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.1);
+        } catch(e) {}
+    }
+
+    function playHover() {
+        if (!soundEnabled || !audioCtx) return;
+        try {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.06);
+        } catch(e) {}
+    }
+
+    // Sound toggle
+    const soundToggle = document.getElementById('sound-toggle');
+    if (soundToggle) {
+        soundToggle.addEventListener('click', () => {
+            initAudio();
+            soundEnabled = !soundEnabled;
+            soundToggle.classList.toggle('active', soundEnabled);
+            const icon = document.getElementById('sound-icon');
+            if (icon) {
+                icon.className = soundEnabled ? 'fas fa-volume-up' : 'fas fa-volume-mute';
+            }
+            if (soundEnabled) playClick();
         });
     }
 
-    /* === CUSTOM CURSOR === */
-    const cursorDot = document.querySelector('.cursor-dot');
-    const cursorOutline = document.querySelector('.cursor-outline');
-    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-    
-    if (!isTouchDevice && cursorDot && cursorOutline) {
-        window.addEventListener('mousemove', (e) => {
-            cursorDot.style.left = `${e.clientX}px`;
-            cursorDot.style.top = `${e.clientY}px`;
-            cursorOutline.animate({
-                left: `${e.clientX}px`, top: `${e.clientY}px`
-            }, { duration: 500, fill: "forwards" });
-        });
-
-        document.querySelectorAll('a, .bento-item, .social-btn, .pill').forEach(el => {
-            el.addEventListener('mouseenter', () => cursorOutline.classList.add('hover'));
-            el.addEventListener('mouseleave', () => cursorOutline.classList.remove('hover'));
-        });
-    } else {
-        if(cursorDot) cursorDot.style.display = 'none';
-        if(cursorOutline) cursorOutline.style.display = 'none';
-    }
-
-    /* === 3D TILT EFFECT === */
-    document.querySelectorAll('[data-tilt]').forEach(el => {
-        el.addEventListener('mousemove', (e) => {
-            if (isTouchDevice) return;
-            const rect = el.getBoundingClientRect();
-            const rotateX = ((e.clientY - rect.top - rect.height/2) / (rect.height/2)) * -3;
-            const rotateY = ((e.clientX - rect.left - rect.width/2) / (rect.width/2)) * 3;
-            el.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.01,1.01,1.01)`;
-        });
-        el.addEventListener('mouseleave', () => {
-            if (isTouchDevice) return;
-            el.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)`;
-        });
+    // Attach sound to all [data-sound] elements
+    document.querySelectorAll('[data-sound]').forEach(el => {
+        el.addEventListener('click', playClick);
+        el.addEventListener('mouseenter', playHover);
     });
 
-    /* === ANIMATED COUNTER === */
-    const counters = document.querySelectorAll('.stat-number');
-    const animateCounters = () => {
-        counters.forEach(counter => {
-            const target = +counter.getAttribute('data-target');
-            const updateCount = () => {
-                const count = +counter.innerText;
-                const inc = target / 200;
-                if (count < target) {
-                    counter.innerText = Math.ceil(count + inc);
-                    setTimeout(updateCount, 15);
-                } else { counter.innerText = target; }
-            };
-            updateCount();
-        });
-    };
-    setTimeout(animateCounters, 1000);
+    /* ===========================
+       SCROLL ANIMATIONS
+    =========================== */
+    const animEls = document.querySelectorAll('.card, .section-label, .hero-badge, .hero-title, .hero-subtitle, .hero-tags');
+    animEls.forEach(el => el.classList.add('fade-up'));
 
-    /* === CHART.JS RADAR — LIGHT THEME === */
-    const ctx = document.getElementById('skillsRadarChart');
-    if(ctx) {
-        new Chart(ctx, {
-            type: 'radar',
-            data: {
-                labels: ['Machine Learning', 'Data Analysis', 'Python', 'SQL & Databases', 'MLOps / Docker', 'Frontend Dev'],
-                datasets: [{
-                    label: 'Skill Level',
-                    data: [88, 90, 95, 85, 80, 75],
-                    backgroundColor: 'rgba(99, 102, 241, 0.15)',
-                    borderColor: 'rgba(99, 102, 241, 0.8)',
-                    pointBackgroundColor: 'rgba(139, 92, 246, 1)',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: 'rgba(139, 92, 246, 1)',
-                    borderWidth: 2,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    r: {
-                        angleLines: { color: 'rgba(0, 0, 0, 0.08)' },
-                        grid: { color: 'rgba(0, 0, 0, 0.06)' },
-                        pointLabels: {
-                            color: '#64748b',
-                            font: { family: "'Fira Code', monospace", size: 11 }
-                        },
-                        ticks: { display: false, min: 0, max: 100 }
-                    }
-                },
-                plugins: { legend: { display: false } }
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    animEls.forEach(el => observer.observe(el));
+
+    /* ===========================
+       ACTIVE NAV LINK ON SCROLL
+    =========================== */
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    function updateActiveNav() {
+        let current = '';
+        sections.forEach(section => {
+            const top = section.offsetTop - 150;
+            if (window.scrollY >= top) {
+                current = section.getAttribute('id');
+            }
+        });
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === '#' + current) {
+                link.classList.add('active');
             }
         });
     }
+    window.addEventListener('scroll', updateActiveNav);
+    updateActiveNav();
+
+    /* ===========================
+       SMOOTH SCROLL NAV
+    =========================== */
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = link.getAttribute('href');
+            const target = document.querySelector(targetId);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+            playClick();
+        });
+    });
+
+    /* ===========================
+       STAGGER ANIMATION DELAY
+    =========================== */
+    document.querySelectorAll('.skills-grid .card, .achievements-grid .card, .hero-tags .tag').forEach((el, i) => {
+        el.style.transitionDelay = (i * 0.08) + 's';
+    });
+
 });
